@@ -1,0 +1,3 @@
+﻿  ProjectMartian.cpp
+C:\Personal\Programs\ProjectMartian\ProjectMartian\ProjectMartian.cpp(183,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+  ProjectMartian.vcxproj -> C:\Personal\Programs\ProjectMartian\x64\Debug\ProjectMartian.exe
