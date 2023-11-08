@@ -210,25 +210,28 @@ int inputValidation() {
 	int input;
 	bool valid = false;
 
-	while (!valid) {
+	do {
 
+		// Receives user input.
 		cin >> input;
 
+		// If the user enters a value that cannot be stored inside an int variable, such as a string, it will catch the fail state.
 		if (cin.fail()) {
 
+			// Prompt the user for valid input.
 			cout << "\nPlease enter a number to proceed!\n";
-			cin.clear();
-			cin.ignore(256, '\n');
-			continue;
+			cin.clear();	// Clears the fail state.
+			cin.ignore();	// Clears cin so new input can be received.
 
 		}
 		else {
 
+			// If the user enters a value that can be stored inside an int variable, their input is valid and input can be returned.
 			valid = true;
 
 		}
 
-	}
+	} while (!valid);
 
 	return input;
 
