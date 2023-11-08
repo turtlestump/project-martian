@@ -1,3 +1,5 @@
 11/8
 
 - Added an input validation function to ensure the user enters a number to navigate menus.
+- Implemented armor class/missing attacks to the battle method and its helper functions.
+- Created a dungeon generation function that will be used to randomly arrange preset rooms.
