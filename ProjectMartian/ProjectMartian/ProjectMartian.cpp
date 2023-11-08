@@ -2,7 +2,6 @@
 // Johnathan Church
 
 #include <cmath>
-#include <cstdlib>
 #include <iomanip>
 #include <iostream>
 #include <string>
@@ -170,6 +169,7 @@ void castSpell(player& user, enemy& target, int spellIndex);
 void displayWeapon(player user);
 
 // Function prototypes.
+int inputValidation();
 void characterCreator(player& user);
 void displayStats(player user);
 void battle(player& user, enemy& target);
@@ -201,6 +201,36 @@ int main() {
 
 	system("cls");
 	battle(user, rockling);
+
+}
+
+// Input validation function: Ensures the user does not enter anything other than an integer.
+int inputValidation() {
+
+	int input;
+	bool valid = false;
+
+	while (!valid) {
+
+		cin >> input;
+
+		if (cin.fail()) {
+
+			cout << "\nPlease enter a number to proceed!\n";
+			cin.clear();
+			cin.ignore(256, '\n');
+			continue;
+
+		}
+		else {
+
+			valid = true;
+
+		}
+
+	}
+
+	return input;
 
 }
 
@@ -262,8 +292,8 @@ void characterCreator(player& user) {
 		// Display the user's stats and prompt them to confirm.
 		int confirm;
 		displayStats(user);
-		cout << "\n\nEnter '1' to confirm your stats, and any other key to reassign points.\n";
-		cin >> confirm;
+		cout << "\n\nEnter '1' to confirm your stats, and any other number to reassign points.\n";
+		confirm = inputValidation();
 
 		// Check whether or not to repeat the loop.
 		if (confirm == 1) {
@@ -302,7 +332,7 @@ void characterCreator(player& user) {
 			<< "1. Spear: Swords deal more consistent damage, but have the potential for less. (3-6)\n"
 			<< "2. Mace: Maces have the potential for both a high and low damage output. (1-10)\n"
 			<< "3. Sword: Swords fall somewhere in the middle. (2-8)\n\n";
-		cin >> select;
+		select = inputValidation();
 
 		switch (select) {
 
@@ -376,7 +406,7 @@ void battle(player& user, enemy& target) {
 				 << "3. " << "Information\n\n";                                     // 1. Weapon    (Uses the player's weapon)
 																					// 2. Magic     (Displays a menu of spells)
 			// Accept the player's selection.                                       // 3. Inventory (Allows the player to inspect the enemy)
-			cin >> select;
+			select = inputValidation();
 
 			// This switch-case will perform the action corresponding with the user's selection.
 			switch (select) {
@@ -403,12 +433,16 @@ void battle(player& user, enemy& target) {
 					valid = true;
 					break;
 
-					}
+				}
 
-				case 2:
+				case 2: {
 
 					// Clear the menu.
 					system("cls");
+
+					/* This vector contains a list of valid entries to ensure that castSpell
+						   is not called if the player changes their mind about spellcasting. */
+					vector<int> validEntries;
 
 					// Print the spell menu and accept the player's selection.
 					cout << "Spell Menu\n\n";
@@ -416,22 +450,46 @@ void battle(player& user, enemy& target) {
 
 						cout << i + 1 << ". " << user.spells[i].name << "\n";
 
+						validEntries.push_back(i + 1);
+
 					}
 					cout << "\n";
 
 					// Accept the player's selection.
-					cin >> select;
+					cout << "Enter any other number to return to the battle menu.\n";
+					select = inputValidation();
+					bool exit = true;
 
-					// Have the player cast a spell.
-					castSpell(user, target, select - 1);
+					for (int i = 0; i < validEntries.size(); i++) {
 
-					// Progress to the enemy's turn.
-					cout << "\n\nPress ENTER to continue.\n";
-					cin.ignore();
-					cin.get();
+						if (select == validEntries[i]) {
 
-					valid = true;
+							exit = false;
+
+						}
+
+					}
+
+					// If the player decided to cast a spell
+					if (!exit) {
+
+						// Have the player cast a spell.
+						castSpell(user, target, select - 1);
+
+						valid = true;
+
+						// Progress to the enemy's turn.
+						cout << "\n\nPress ENTER to continue.\n";
+						cin.ignore();
+						cin.get();
+
+						break;
+
+					}
+
 					break;
+
+				}
 
 				case 3:
 
@@ -503,7 +561,7 @@ void pointAssignment(player& user, string statName, int stat, int& points) {
 		cout << "Points remaining: " << points
 		     << "\nYour " << statName << " score: " << user.stats[stat]
 			 << "\n\nHow many points would you like to add to " << statName << "?\n";
-		cin >> assignment;
+		assignment = inputValidation();
 
 		if (assignment <= points && assignment >= 0) {
 
