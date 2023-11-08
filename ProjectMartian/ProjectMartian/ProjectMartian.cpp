@@ -177,6 +177,19 @@ void battle(player& user, enemy& target);
 // Testing function prototypes.
 void displayPlayer(player user);
 
+// Room function prototypes
+void room1();
+void room2();
+void room3();
+void room4();
+void room5();
+void room6();
+void room7();
+void room8();
+void room9();
+void room10();
+void generateDungeon(int dungeon[2][5]);
+
 // The main function: Program execution begins and ends here.
 int main() {
 
@@ -419,14 +432,28 @@ void battle(player& user, enemy& target) {
 					// Clear the menu.
 					system("cls");
 
-					// Determine the attack's damage.
-					int damage = weaponAttack(user.userWeapon, user.statModifiers[0]);
+					// Roll to hit.
+					int hit = (rand() % 20) + 3 + user.statModifiers[0];
 
-					// Display the attack's effects.
-					cout << user.name << " used " << user.userWeapon.name << ", dealing " << damage << " damage.";
+					// Test whether the hit lands or not (compare hit with the target's armor class).
+					if (hit >= target.armorClass) {
 
-					// Subtract the appropriate hit points from the enemy.
-					target.health -= damage;
+						// Determine the attack's damage.
+						int damage = weaponAttack(user.userWeapon, user.statModifiers[0]);
+
+						// Display the attack's effects.
+						cout << user.name << " used " << user.userWeapon.name << ", dealing " << damage << " damage.";
+
+						// Subtract the appropriate hit points from the enemy.
+						target.health -= damage;
+
+					}
+					else {
+
+						// Inform the player of their missed attack.
+						cout << user.name << " used " << user.userWeapon.name << ", but it missed!";
+
+					}
 
 					// Progress to the enemy's turn.
 					cout << "\n\nPress ENTER to continue.\n";
@@ -479,13 +506,12 @@ void battle(player& user, enemy& target) {
 						// Have the player cast a spell.
 						castSpell(user, target, select - 1);
 
-						valid = true;
-
 						// Progress to the enemy's turn.
 						cout << "\n\nPress ENTER to continue.\n";
 						cin.ignore();
 						cin.get();
 
+						valid = true;
 						break;
 
 					}
@@ -509,6 +535,13 @@ void battle(player& user, enemy& target) {
 					break;
 
 			}
+
+		}
+
+		// Test if the enemy has been defeated and exit the loop.
+		if (target.health <= 0) {
+
+			break;
 
 		}
 
@@ -591,14 +624,28 @@ void pointAssignment(player& user, string statName, int stat, int& points) {
 // Helper functions for the battle function.
 void enemyAttack(player& user, enemy target, int attackIndex) {
 
-	// Determine the attack's damage.
-	int damage = weaponAttack(target.attacks[attackIndex], (target.stats[0] - 10) / 2);
+	// Roll to hit.
+	int hit = (rand() % 20) + 3 + ((target.stats[0] - 10) / 2);
 
-	// Display the attack's effects.
-	cout << target.name << " used " << target.attacks.at(attackIndex).name << ", dealing " << damage << " damage.";
+	// Test whether the hit lands or not (compare hit with the target's armor class).
+	if (hit >= user.armorClass) {
 
-	// Subtract the appropriate hit points from the player.
-	user.health -= damage;
+		// Determine the attack's damage.
+		int damage = weaponAttack(target.attacks[attackIndex], (target.stats[0] - 10) / 2);
+
+		// Display the attack's effects.
+		cout << target.name << " used " << target.attacks.at(attackIndex).name << ", dealing " << damage << " damage.";
+
+		// Subtract the appropriate hit points from the player.
+		user.health -= damage;
+
+	}
+	else {
+
+		// Inform the player of the enemy's missed attack.
+		cout << target.name << " used " << target.attacks.at(attackIndex).name << ", but it missed!";
+
+	}
 
 }
 int weaponAttack(weapon userWeapon, int strengthModifier) {
@@ -628,15 +675,29 @@ void castSpell(player& user, enemy& target, int spellIndex) {
 	}
 	else {
 
-		// Determine the spell's damage.
-		int damage = (rand() % (userSpell.maxDamage - userSpell.minDamage + 1) + userSpell.minDamage) + user.statModifiers[4];
+		// Roll to hit.
+		int hit = (rand() % 20) + 3 + user.statModifiers[4];
 
-		// Clear the menu.
-		system("cls");
+		// Test whether the hit lands or not (compare hit with the target's armor class).
+		if (hit >= target.armorClass) {
 
-		// Print the effects of the spell.
-		cout << user.name << " casted " << userSpell.name << ", dealing " << damage << " points of damage.";
-		target.health -= damage;
+			// Determine the spell's damage.
+			int damage = (rand() % (userSpell.maxDamage - userSpell.minDamage + 1) + userSpell.minDamage) + user.statModifiers[4];
+
+			// Clear the menu.
+			system("cls");
+
+			// Print the effects of the spell.
+			cout << user.name << " casted " << userSpell.name << ", dealing " << damage << " points of damage.";
+			target.health -= damage;
+
+		}
+		else {
+
+			// Inform the player of their missed attack.
+			cout << user.name << " casted " << userSpell.name << ", but it missed!";
+
+		}
 
 	}
 
@@ -662,5 +723,51 @@ void displayPlayer(player user) {
 	displayStats(user);
 	cout << "\n";
 	displayWeapon(user);
+
+}
+
+/* Room functions : A total of ten rooms will make up the dungeon. Each room is unique and has its own function.
+					At the start of the program, the generateDungeon function will randomly choose a layout for these rooms. */
+void generateDungeon(int dungeon[2][5]) {
+
+	// This vector will hold the rooms that have been used already.
+	vector<int> usedRooms;
+
+	// The following for loops will iterate through dungeon to assign its rooms.
+	for (int row = 0; row < 2; row++) {
+
+		for (int column = 0; column < 5; column++) {
+
+			// This do-while loop ensures that a room is not used twice.
+			bool used;
+			do {
+
+				used = false;
+				dungeon[row][column] = (rand() % 10) + 1;	// Generates a random room for this position.
+				
+				// Makes sure that usedRooms is not empty. The code inside this if-statement should not execute during the first iteration.
+				if (usedRooms.size() > 0) {
+
+					// Loops through usedRooms to check if the room has been used.
+					for (int room = 0; room < usedRooms.size(); room++) {
+
+						if (usedRooms[room] == dungeon[row][column]) {
+
+							used = true;	// Sets the loop condition to true to assign the room a different value.
+
+						}
+
+					}
+
+				}
+
+			} while (used);
+
+			// Adds the assigned room to usedRooms.
+			usedRooms.push_back(dungeon[row][column]);
+
+		}
+
+	}
 
 }
