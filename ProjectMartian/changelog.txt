@@ -3,3 +3,9 @@
 - Added an input validation function to ensure the user enters a number to navigate menus.
 - Implemented armor class/missing attacks to the battle method and its helper functions.
 - Created a dungeon generation function that will be used to randomly arrange preset rooms.
+
+11/9
+
+- Created the entrance function: This function handles the start of the dungeon and calculates the player's mana.
+- Implemented mana cost for spells.
+- Fixed a bug where the player could heal to a point that exceeds their maximum hit points
