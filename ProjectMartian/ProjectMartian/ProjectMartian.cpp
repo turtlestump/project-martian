@@ -31,12 +31,12 @@ public:
 		magical = false;
 
 	}
-	weapon(string cName, int cMaxDamage, int cMinDamage, bool cMagical) {
+	weapon(string name, int maxDamage, int minDamage, bool magical) {
 
-		name = cName;
-		maxDamage = cMaxDamage;
-		minDamage = cMinDamage;
-		magical = cMagical;
+		this->name = name;
+		this->maxDamage = maxDamage;
+		this->minDamage = minDamage;
+		this->magical = magical;
 
 	}
 
@@ -53,15 +53,17 @@ public:
 	int minDamage;
 	int maxHeal;
 	int minHeal;
+	int manaCost;
 
 	// Constructor
-	spell(string cName, int cMaxDamage, int cMinDamage, int cMaxHeal, int cMinHeal) {
+	spell(string name, int maxDamage, int minDamage, int maxHeal, int minHeal, int manaCost) {
 
-		name = cName;
-		maxDamage = cMaxDamage;
-		minDamage = cMinDamage;
-		maxHeal = cMaxHeal;
-		minHeal = cMinHeal;
+		this->name = name;
+		this->maxDamage = maxDamage;
+		this->minDamage = minDamage;
+		this->maxHeal = maxHeal;
+		this->minHeal = minHeal;
+		this->manaCost = manaCost;
 
 	}
 
@@ -177,17 +179,8 @@ void battle(player& user, enemy& target);
 // Testing function prototypes.
 void displayPlayer(player user);
 
-// Room function prototypes
-void room1();
-void room2();
-void room3();
-void room4();
-void room5();
-void room6();
-void room7();
-void room8();
-void room9();
-void room10();
+// Room function prototypes.
+void entrance(player& user);
 void generateDungeon(int dungeon[2][5]);
 
 // The main function: Program execution begins and ends here.
@@ -202,14 +195,14 @@ int main() {
 	characterCreator(user);
 
 	/* TESTING: SPELLS AND BATTLES */
-	spell fireball("Fireball", 10, 1, 0, 0);
-	user.spells.push_back(fireball);
+	system("cls");
+	entrance(user);
 
 	int enemyStats[3] = {10, 10, 10};
 
 	weapon testWeapon("Test Weapon", 5, 1, false);
 	vector<weapon> enemyAttacks;
-	enemy rockling("Rockling", "Testing", 10, 10, 10, enemyStats, enemyAttacks, false, false);
+	enemy rockling("Rockling", "Testing", 30, 30, 10, enemyStats, enemyAttacks, false, false);
 	rockling.attacks.push_back(testWeapon);
 
 	system("cls");
@@ -250,7 +243,7 @@ int inputValidation() {
 
 }
 
-// Character creation function
+// Character creation functions
 void characterCreator(player& user) {
 	
 	// Assign default values to stats (points will be added to these values).
@@ -433,7 +426,7 @@ void battle(player& user, enemy& target) {
 					system("cls");
 
 					// Roll to hit.
-					int hit = (rand() % 20) + 3 + user.statModifiers[0];
+					int hit = (rand() % 18) + 3 + user.statModifiers[0];
 
 					// Test whether the hit lands or not (compare hit with the target's armor class).
 					if (hit >= target.armorClass) {
@@ -491,7 +484,7 @@ void battle(player& user, enemy& target) {
 					bool exit = true;
 
 					for (int i = 0; i < validEntries.size(); i++) {
-
+						
 						if (select == validEntries[i]) {
 
 							exit = false;
@@ -502,6 +495,20 @@ void battle(player& user, enemy& target) {
 
 					// If the player decided to cast a spell
 					if (!exit) {
+
+						// Clear the spell menu.
+						system("cls");
+
+						// Check if the player has enough mana.
+						if (user.spells.at(select - 1).manaCost > user.mana) {
+
+							cout << "You don't have enough mana..."
+								 << "\n\nPress ENTER to return to the battle menu.\n";
+							cin.ignore();
+							cin.get();
+							break;
+
+						}
 
 						// Have the player cast a spell.
 						castSpell(user, target, select - 1);
@@ -625,7 +632,7 @@ void pointAssignment(player& user, string statName, int stat, int& points) {
 void enemyAttack(player& user, enemy target, int attackIndex) {
 
 	// Roll to hit.
-	int hit = (rand() % 20) + 3 + ((target.stats[0] - 10) / 2);
+	int hit = (rand() % 18) + 3 + ((target.stats[0] - 10) / 2);
 
 	// Test whether the hit lands or not (compare hit with the target's armor class).
 	if (hit >= user.armorClass) {
@@ -658,6 +665,9 @@ int weaponAttack(weapon userWeapon, int strengthModifier) {
 void castSpell(player& user, enemy& target, int spellIndex) {
 
 	spell userSpell = user.spells[spellIndex];
+	
+	// Deplete the user's mana by the spell's mana cost.
+	user.mana -= userSpell.manaCost;
 
 	// Detect whether the spell is a healing or damaging spell.
 	if (userSpell.maxHeal > 0) {
@@ -672,11 +682,18 @@ void castSpell(player& user, enemy& target, int spellIndex) {
 		cout << user.name << " casted " << userSpell.name << ", healing for " << heal << " hit points.";
 		user.health += heal;
 
+		// Make sure the player's health does not exceed their max health.
+		if (user.health > user.maxHealth) {
+
+			user.health = user.maxHealth;
+
+		}
+
 	}
 	else {
 
 		// Roll to hit.
-		int hit = (rand() % 20) + 3 + user.statModifiers[4];
+		int hit = (rand() % 18) + 3 + user.statModifiers[4];
 
 		// Test whether the hit lands or not (compare hit with the target's armor class).
 		if (hit >= target.armorClass) {
@@ -728,8 +745,44 @@ void displayPlayer(player user) {
 
 /* Room functions : A total of ten rooms will make up the dungeon. Each room is unique and has its own function.
 					At the start of the program, the generateDungeon function will randomly choose a layout for these rooms. */
-void generateDungeon(int dungeon[2][5]) {
+void entrance(player& user) {
 
+	// Room description and magic rune.
+	cout << "You push open the temple doors to reveal a grand chamber with grand statues of the Martians lining the walls."
+		 << "\nIn the center of the room is a raised dais, atop which a glowing green rune shines through the red dirt."
+		 << "\nThe walls are lined with large stone pillars carved into what resemble humanoid figures, but foreign and harsh."
+		 << "\nYou walk towards the dais in the central room, mesmerized by the bright green glow illuminating the path ahead."
+		 << "\nAs you step upon the pedestal, the rune alights to glow even brighter, surrounding you with the magic of the ancient"
+		 << "\nMartians."
+		 << "\n\nYou look down, suddenly finding it difficult to control the mechanisms of your body, and, as if by instinct, launch a "
+		 << "\nflaming ball of energy towards the walls of the temple, destroying one of the pillars ahead."
+		 << "\n\nYou dash forward, hoping to make it through the large stone doorway towards the back wall before it crumbles."
+		 << "\nYou just make it. The doorway crumbles behind you as your find yourself in a new space, grappling with the"
+		 << "\nimplications of your new abilities.";
+
+	cout << "\n\nYou have been granted the gift of magic. Your intelligence stat influences your mana, the magical currency which governs"
+		 << "\nyour capacity to cast spells.";
+
+	// Calculate the player's mana.
+	user.maxMana = 30 + user.statModifiers[3] * 10;
+	user.mana = user.maxMana;
+
+	// Assign the player two starting spells: Fireball and Restoration.
+	spell fireball("Fireball", 10, 1, 0, 0, 8);
+	spell restoration("Restoration", 0, 0, 12, 4, 6);
+	user.spells.push_back(fireball);
+	user.spells.push_back(restoration);
+
+	// Inform the player of their new abilities and progress to the first generated room.
+	cout << "\n\nYou learned a new spell! Fireball allows you to burn enemies in a wave of flame."
+		 << "\nYou learned a new spell! Restoration allows you to heal during the heat of battle."
+		 << "\n\nPress ENTER to continue to the first room.\n";
+	cin.ignore();
+	cin.get();
+	
+}
+void generateDungeon(int dungeon[2][5]) {
+	
 	// This vector will hold the rooms that have been used already.
 	vector<int> usedRooms;
 
