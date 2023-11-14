@@ -9,3 +9,22 @@
 - Created the entrance function: This function handles the start of the dungeon and calculates the player's mana.
 - Implemented mana cost for spells.
 - Fixed a bug where the player could heal to a point that exceeds their maximum hit points
+
+11/10
+
+- Created a dungeon generation function (generateLayout) that randomly assigns positions to rooms within a 5x2 grid.
+- i.e. [ ] [ ] [ ] [ ] [ ]
+       [ ] [ ] [ ] [ ] [ ]
+- Created the entrance function, which consists of the first temple room before the randomly generated layout. This
+  function uses the player's intelligence stat to determine the mana points available to them and gives them two starter spells:
+  fireball (a damaging spell) and restoration (a healing spell).
+
+11/13
+
+- Created a function that determines which ways the player can move from each room (returns a boolean vector that determines
+  whether the player can move up, down, left, and right.
+
+11/14
+
+- Added an introduction segment to the entrance function, which provides a different narrative reason for crash landing
+  depending on the player's lowest stat.
