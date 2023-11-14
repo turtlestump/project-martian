@@ -165,6 +165,7 @@ public:
 
 // Helper function prototypes.
 void pointAssignment(player& user, string statName, int stat, int& points);
+int findLowestStat(player user);
 void enemyAttack(player& user, enemy target, int attackIndex);
 int weaponAttack(weapon userWeapon, int strengthModifier);
 void castSpell(player& user, enemy& target, int spellIndex);
@@ -181,32 +182,20 @@ void displayPlayer(player user);
 
 // Room function prototypes.
 void entrance(player& user);
-void generateDungeon(int dungeon[2][5]);
+void generateLayout(int layout[2][5]);
+vector<bool> getPathways(int room, int layout[2][5]);
 
 // The main function: Program execution begins and ends here.
 int main() {
 
 	srand(time(NULL));
 
-	// Initialize a player object.
+	// Initialize a player object and take them through character creation.
 	player user;
-
-	// Character Creation
 	characterCreator(user);
 
-	/* TESTING: SPELLS AND BATTLES */
-	system("cls");
+	// Thus begins the start of the dungeon. The entrance function will provide context, have them enter the dungeon, and provide them with magic.
 	entrance(user);
-
-	int enemyStats[3] = {10, 10, 10};
-
-	weapon testWeapon("Test Weapon", 5, 1, false);
-	vector<weapon> enemyAttacks;
-	enemy rockling("Rockling", "Testing", 30, 30, 10, enemyStats, enemyAttacks, false, false);
-	rockling.attacks.push_back(testWeapon);
-
-	system("cls");
-	battle(user, rockling);
 
 }
 
@@ -243,7 +232,7 @@ int inputValidation() {
 
 }
 
-// Character creation functions
+// Character creation function: Assigns the player stats and a name, filling their attributes.
 void characterCreator(player& user) {
 	
 	// Assign default values to stats (points will be added to these values).
@@ -259,7 +248,8 @@ void characterCreator(player& user) {
 	int points = 24;
 
 	// Prompt the user for their character's name.
-	cout << "First, what is your name?\n";
+	cout << "Welcome to Project Martian."
+		 << "\n\nPlease enter your name.\n";
 	getline(cin, user.name);
 
 	// Do-while loop, in case the player decides to rethink their stats.
@@ -376,7 +366,7 @@ void characterCreator(player& user) {
 
 }
 
-// This function displays the player's stats.
+// This function displays the player's stats and is used in the characterCreation function.
 void displayStats(player user) {
 
 	cout << "Strength: " << user.stats[0] << " (" << user.statModifiers[0] << ")"
@@ -388,7 +378,7 @@ void displayStats(player user) {
 
 }
 
-// Battle function
+// Battle function: The user and the target should alternate turns until one of them reaches a health value of 0 or lower.
 void battle(player& user, enemy& target) {
 
 	// This variable will be used to navigate the battle menu.
@@ -433,6 +423,18 @@ void battle(player& user, enemy& target) {
 
 						// Determine the attack's damage.
 						int damage = weaponAttack(user.userWeapon, user.statModifiers[0]);
+						
+						// Check whether the target is resistant/vulnerable.
+						if (target.vulnerability == true && user.userWeapon.magical == true) {
+
+							damage *= 2;
+
+						}
+						else if (target.resistance == true && user.userWeapon.magical == false) {
+
+							damage *= 0.5;
+
+						}
 
 						// Display the attack's effects.
 						cout << user.name << " used " << user.userWeapon.name << ", dealing " << damage << " damage.";
@@ -628,6 +630,27 @@ void pointAssignment(player& user, string statName, int stat, int& points) {
 
 }
 
+// Helper function for the entrance function.
+int findLowestStat(player user) {
+
+	int lowestStat = user.stats[0];
+	int lowestIndex = 0;
+
+	for (int stat = 1; stat < 6; stat++) {
+
+		if (user.stats[stat] < lowestStat) {
+
+			lowestStat = user.stats[stat];
+			lowestIndex = stat;
+
+		}
+
+	}
+
+	return lowestIndex;
+
+}
+
 // Helper functions for the battle function.
 void enemyAttack(player& user, enemy target, int attackIndex) {
 
@@ -701,6 +724,13 @@ void castSpell(player& user, enemy& target, int spellIndex) {
 			// Determine the spell's damage.
 			int damage = (rand() % (userSpell.maxDamage - userSpell.minDamage + 1) + userSpell.minDamage) + user.statModifiers[4];
 
+			// Check whether the target is vulnerable.
+			if (target.vulnerability == true) {
+
+				damage *= 2;
+
+			}
+
 			// Clear the menu.
 			system("cls");
 
@@ -744,8 +774,86 @@ void displayPlayer(player user) {
 }
 
 /* Room functions : A total of ten rooms will make up the dungeon. Each room is unique and has its own function.
-					At the start of the program, the generateDungeon function will randomly choose a layout for these rooms. */
+ 
+					At the start of the program, the generateLayout function will randomly choose a layout for these rooms.
+
+					The getPathways function uses the generated 2D array and the room number to find out how many paths
+					the player can take in that room.
+					
+					The entrance function provides the player with context to their adventure and grants them magic. */
 void entrance(player& user) {
+
+	// Clear any information on screen.
+	system("cls");
+
+	// This variable holds the index of the user's lowest stat and will affect their reason for crash landing on Mars.
+	int lowestStat = findLowestStat(user);
+
+	// Print the introduction.
+	switch (lowestStat) {
+
+	case 0:
+
+		cout << "You are an astronaut from planet Earth. Caught in a solar flare, your spacecraft lost power above"
+			<< "\nthe red planet, Mars. Failing to pull away from the planet's graviational pull, you were forced"
+			<< "\nto make a crash landing at the base of the solar system's largest volcano: Olympus Mons.";
+		break;
+
+	case 1:
+
+		cout << "You are an astronaut from planet Earth. Attempting to maneuver between an asteroid field, you were"
+			<< "\nunable to weave between the space debris and your spacecraft was damaged. You were forced to make"
+			<< "\na crash landing on the red planet, Mars, at the base of the solar system's largest volcano:"
+			<< "\nOlympus Mons.";
+		break;
+
+	case 2:
+
+		cout << "You are an astronaut from planet Earth. Drifting through space, you were unable to withstand the"
+			<< "\ngravitational forces of space travel and began falling to the surface of the red planet, Mars,"
+			<< "\nmaking a crash landing at the base of the solar system's largest volcano: Olympus Mons.";
+		break;
+
+	case 3:
+
+		cout << "You are an astronaut from planet Earth. Accidentally drifting too close to the gravitational pull of"
+			<< "\nthe red planet, Mars, you were forced to make a crash landing at the base of the solar system's"
+			<< "\nlargest volcano: Olympus Mons.";
+		break;
+
+	case 4:
+
+		cout << "You are an astronaut from planet Earth. Your captain, having succumbed to the gravitational forces"
+			<< "\nduring takeoff, is now slumped over dead in the cockpit. A rookie, too inexperienced to fly the craft"
+			<< "\nyourself, you were forced to make a crash landing on the red planet, Mars, at the base of the solar"
+			<< "\nsystem's largest volcano: Olympus Mons.";
+		break;
+
+	case 5:
+
+		cout << "You are a refugee from planet Earth. Ostracized from society, you were condemned to drift through the vast"
+			<< "\nreaches of space in search for a new home. Having lost power long ago, your spacecraft drifted too close to"
+			<< "\nthe gravitational pull of the red planet, Mars, forcing you to make a crash landing at the base of the solar"
+			<< "\nsystem's largest volcano: Olympus Mons.";
+		break;
+
+	default:
+
+		cout << "Error. Could not determine the player's lowest stat.";
+		exit(0);
+
+	}
+
+	cout << "\n\nClimbing out of the wreckage, you stand beforea grand Martian temple carved into the side"
+		<< "\nof the mountain. Stone monuments to the ancient Martians line the temple steps, looking down"
+		<< "\non you as you climb to the entrance, seeeking shelter from the incoming dust storm.";
+
+	cout << "\n\nPress ENTER to enter the temple doors.\n";
+	cin.ignore();
+	cin.get();
+
+	// Clear any information on screan.
+	system("cls");
 
 	// Room description and magic rune.
 	cout << "You push open the temple doors to reveal a grand chamber with grand statues of the Martians lining the walls."
@@ -777,11 +885,10 @@ void entrance(player& user) {
 	cout << "\n\nYou learned a new spell! Fireball allows you to burn enemies in a wave of flame."
 		 << "\nYou learned a new spell! Restoration allows you to heal during the heat of battle."
 		 << "\n\nPress ENTER to continue to the first room.\n";
-	cin.ignore();
 	cin.get();
-	
+
 }
-void generateDungeon(int dungeon[2][5]) {
+void generateLayout(int layout[2][5]) {
 	
 	// This vector will hold the rooms that have been used already.
 	vector<int> usedRooms;
@@ -796,7 +903,7 @@ void generateDungeon(int dungeon[2][5]) {
 			do {
 
 				used = false;
-				dungeon[row][column] = (rand() % 10) + 1;	// Generates a random room for this position.
+				layout[row][column] = (rand() % 10) + 1;	// Generates a random room for this position.
 				
 				// Makes sure that usedRooms is not empty. The code inside this if-statement should not execute during the first iteration.
 				if (usedRooms.size() > 0) {
@@ -804,7 +911,7 @@ void generateDungeon(int dungeon[2][5]) {
 					// Loops through usedRooms to check if the room has been used.
 					for (int room = 0; room < usedRooms.size(); room++) {
 
-						if (usedRooms[room] == dungeon[row][column]) {
+						if (usedRooms[room] == layout[row][column]) {
 
 							used = true;	// Sets the loop condition to true to assign the room a different value.
 
@@ -817,10 +924,62 @@ void generateDungeon(int dungeon[2][5]) {
 			} while (used);
 
 			// Adds the assigned room to usedRooms.
-			usedRooms.push_back(dungeon[row][column]);
+			usedRooms.push_back(layout[row][column]);
 
 		}
 
 	}
+
+}
+vector<bool> getPathways(int room, int layout[2][5]) {
+
+	// These variables will track where the room is in the dungeon layout.
+	int roomPosX = 0;	// Represents the column.
+	int roomPosY = 0;	// Represents the row.
+
+	// First, the function will locate the room in the dungeon layout.
+	for (int row = 0; row < 2; row++) {
+
+		for (int column = 0; column < 5; column++) {
+
+			if (layout[row][column] == room) {
+
+				roomPosX = column;
+				roomPosY = row;
+
+			}
+
+		}
+
+	}
+
+	// This boolean vector represents the ways the player can move. Index 0: Up, 1: Down, 2: Left, 3: Right
+	vector<bool> pathways = { false, false, true, true };
+
+	// If the room is in the first row, it will return true for down, and vice-versa for up.
+	if (roomPosY == 0) {
+
+		pathways[1] = true;
+
+	}
+	else if (roomPosY == 1) {
+
+		pathways[0] = true;
+
+	}
+
+	// If the room is far to the left, it will return false for left, and vice-versa for right.
+	if (roomPosX == 0) {
+
+		pathways[2] = false;
+
+	}
+	else if (roomPosX == 4) {
+
+		pathways[3] = false;
+
+	}
+
+	return pathways;
 
 }
