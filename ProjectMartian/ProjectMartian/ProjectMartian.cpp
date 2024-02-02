@@ -308,7 +308,7 @@ public:
 			// Prompt the player for their starting weapon of choice.
 			int select;
 			cout << "Finally, you equipped yourself with a melee weapon before arriving. What was it again?\n\n"
-				<< "1. Spear: Swords deal more consistent damage, but have the potential for less. (3-6)\n"
+				<< "1. Spear: Spears deal more consistent damage, but have the potential for less. (3-6)\n"
 				<< "2. Mace: Maces have the potential for both a high and low damage output. (1-10)\n"
 				<< "3. Sword: Swords fall somewhere in the middle. (2-8)\n\n";
 			select = inputValidation();
@@ -1039,7 +1039,7 @@ void entrance(player& user) {
 
 	cout << "\n\nClimbing out of the wreckage, you stand beforea grand Martian temple carved into the side"
 		<< "\nof the mountain. Stone monuments to the ancient Martians line the temple steps, looking down"
-		<< "\non you as you climb to the entrance, seeeking shelter from the incoming dust storm.";
+		<< "\non you as you climb to the entrance, seeking shelter from the incoming dust storm.";
 
 	cout << "\n\nPress ENTER to enter the temple doors.\n";
 	cin.ignore();
@@ -2117,8 +2117,15 @@ int room6(player& user, int layout[2][5], vector<bool>& cleared, bool first) {
 
 		}
 
-		if (user.health <= 0)
+		if (user.health <= 0) {
+
+			system("cls");
+			cout << "You were vanquished by the Crystal Eye...\n\n"
+				<< "Press ENTER to return to the main menu.\n";
+			cin.get();
 			return -1;
+
+		}
 
 	}
 	else {
@@ -3046,8 +3053,8 @@ int end(player& user) {
 	cout << "Upon the dragon's defeat, you feel the earth begin to violently shake again. You flee the core\n"
 		 << "of the mountain as the volcano begins to erupt. As the ceiling caves in, you desperately try to\n"
 		 << "make it back to the exit, and you succeed, busting through the rubble. Descending the temple steps,\n"
-		 << "you turn to see molten rock chasing you down the mountain. You brace for the incoming flames, but feel\n\n"
-		 << "nothing. Opening your eyes, you see the lava begin to fill a grand moat beneath the temple steps.\n"
+		 << "you turn to see molten rock chasing you down the mountain. You brace for the incoming flames, but feel\n"
+		 << "nothing. Opening your eyes, you see the lava begin to fill a grand moat beneath the temple steps.\n\n"
 		 << "As the lava flows down the volcano, you see beads of green mana light up from beneath the stone,\n"
 		 << "as humanoid figures are born again from the mountain.\n\n"
 		 << "You have brought life to Mars once again by defeating the dragon. The Martians greet you, and use\n"
